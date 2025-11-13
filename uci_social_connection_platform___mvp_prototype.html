@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UCI Connect - MVP</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: #1f2937;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      color: #1e3a8a;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+    
+    .header p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .tab {
+      background: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .tab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .tab.active {
+      background: #1e3a8a;
+      color: white;
+    }
+    
+    .content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      min-height: 500px;
+    }
+    
+    .view {
+      display: none;
+    }
+    
+    .view.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .card {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+    
+    .card.highlighted {
+      border-color: #10b981;
+      background: #ecfdf5;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    
+    .card-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .card-info p {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    
+    .badge.green {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .badge.blue {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge.purple {
+      background: #e9d5ff;
+      color: #6b21a8;
+    }
+    
+    .badge.yellow {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .opendoor-toggle {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 80px;
+      height: 40px;
+      margin: 16px 0;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: .4s;
+      border-radius: 40px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 32px;
+      width: 32px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #10b981;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(40px);
+    }
+    
+    .attendee-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    
+    .attendee-card {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .attendee-card:hover {
+      border-color: #3b82f6;
+    }
+    
+    .attendee-card.starred {
+      border-color: #fbbf24;
+      background: #fffbeb;
+    }
+    
+    .attendee-card .avatar {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 8px;
+      font-size: 24px;
+    }
+    
+    .attendee-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .attendee-card p {
+      font-size: 11px;
+      color: #6b7280;
+    }
+    
+    .mission-card {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 2px solid #fbbf24;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .mission-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 8px;
+    }
+    
+    .mission-card p {
+      font-size: 13px;
+      color: #78350f;
+      margin-bottom: 12px;
+    }
+    
+    .btn {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+    }
+    
+    .btn.secondary {
+      background: #6b7280;
+    }
+    
+    .btn.secondary:hover {
+      background: #4b5563;
+    }
+    
+    .btn.success {
+      background: #10b981;
+    }
+    
+    .btn.success:hover {
+      background: #059669;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .stat-card h3 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .stat-card p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .event-context {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .event-context h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 4px;
+    }
+    
+    .event-context p {
+      font-size: 13px;
+      color: #1e40af;
+    }
+    
+    .notification {
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.5s;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+    
+    .empty-state h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 UCI Connect</h1>
+      <p>Build meaningful connections through events and shared experiences</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab" onclick="switchTab('star')">Star Selection</button>
+      <button class="tab" onclick="switchTab('opendoor')">OpenDoor</button>
+      <button class="tab" onclick="switchTab('mutuals')">My Mutuals</button>
+      <button class="tab" onclick="switchTab('navigator')">Navigator</button>
+    </div>
+    
+    <div class="content">
+      <!-- Dashboard View -->
+      <div id="dashboard" class="view active">
+        <div class="stats">
+          <div class="stat-card">
+            <h3 id="mutualCount">4</h3>
+            <p>Mutual Connections</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="openDoorCount">2</h3>
+            <p>Active OpenDoors</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="missionCount">3</h3>
+            <p>Active Missions</p>
+          </div>
+        </div>
+        
+        <div class="section-title">🚪 Mutuals with Open Doors</div>
+        <div id="dashboardOpenDoors" class="card-grid"></div>
+        
+        <div class="section-title">📋 Your Active Missions</div>
+        <div id="dashboardMissions"></div>
+      </div>
+      
+      <!-- Star Selection View -->
+      <div id="star" class="view">
+        <div class="event-context">
+          <h3>🎮 GameDev Mixer</h3>
+          <p>Yesterday at Student Center • 24 attendees</p>
+        </div>
+        
+        <div class="section-title">Who did you connect with?</div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
+          Select people you'd like to stay connected with. They'll only know if they select you too.
+        </p>
+        
+        <div id="attendeeGrid" class="attendee-grid"></div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+          <button class="btn success" onclick="saveStars()">Save Selections</button>
+          <button class="btn secondary" onclick="skipStars()">Skip for Now</button>
+        </div>
+      </div>
+      
+      <!-- OpenDoor View -->
+      <div id="opendoor" class="view">
+        <div class="opendoor-toggle">
+          <h2 style="margin-bottom: 8px;">🚪 Open Your Door</h2>
+          <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
+            Let your mutual connections know you're available to reconnect
+          </p>
+          
+          <label class="toggle-switch">
+            <input type="checkbox" id="openDoorToggle" onchange="toggleOpenDoor()">
+            <span class="slider"></span>
+          </label>
+          
+          <p id="openDoorStatus" style="font-size: 13px; color: #6b7280; margin-top: 12px;">
+            Your door is currently closed
+          </p>
+        </div>
+        
+        <div id="openDoorNotifications"></div>
+        
+        <div class="section-title">Mutuals with Open Doors</div>
+        <div id="openDoorMutuals" class="card-grid"></div>
+      </div>
+      
+      <!-- Mutuals View -->
+      <div id="mutuals" class="view">
+        <div class="section-title">🌟 Your Mutual Connections</div>
+        <div id="mutualsList" class="card-grid"></div>
+      </div>
+      
+      <!-- Navigator View -->
+      <div id="navigator" class="view">
+        <div class="section-title">🧭 Relationship Navigator</div>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
+          Stay connected with meaningful relationships through personalized missions
+        </p>
+        
+        <div id="navigatorList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample Data
+    const users = [
+      { id: 'u1', firstName: 'Peter', lastName: 'Anteater', uciNetId: 'panteater', affiliation: 'Undergraduate', interests: ['gaming', 'coding'], notificationPreference: 'realtime' },
+      { id: 'u2', firstName: 'Sarah', lastName: 'Chen', uciNetId: 'schen', affiliation: 'Graduate', interests: ['AI', 'research'], notificationPreference: 'daily' },
+      { id: 'u3', firstName: 'Marcus', lastName: 'Johnson', uciNetId: 'mjohnson', affiliation: 'Undergraduate', interests: ['gaming', 'design'], notificationPreference: 'realtime' },
+      { id: 'u4', firstName: 'Emily', lastName: 'Rodriguez', uciNetId: 'erodriguez', affiliation: 'Graduate', interests: ['data science', 'ML'], notificationPreference: 'weekly' },
+      { id: 'u5', firstName: 'Alex', lastName: 'Kim', uciNetId: 'akim', affiliation: 'Undergraduate', interests: ['gaming', 'music'], notificationPreference: 'realtime' },
+      { id: 'u6', firstName: 'Jordan', lastName: 'Lee', uciNetId: 'jlee', affiliation: 'Undergraduate', interests: ['coding', 'hackathons'], notificationPreference: 'daily' }
+    ];
+    
+    const currentUser = users[0]; // Peter Anteater
+    
+    const events = [
+      { id: 'e1', name: 'GameDev Mixer', startTime: '2025-11-11T18:00:00Z', location: 'Student Center', isOfficial: false, attendeeIds: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6'] },
+      { id: 'e2', name: 'AI Research Symposium', startTime: '2025-11-08T14:00:00Z', location: 'Engineering Hall', isOfficial: true, attendeeIds: ['u1', 'u2', 'u4'] },
+      { id: 'e3', name: 'Hackathon Kickoff', startTime: '2025-11-05T10:00:00Z', location: 'ICS Building', isOfficial: true, attendeeIds: ['u1', 'u3', 'u6'] }
+    ];
+    
+    let stars = [
+      { id: 's1', starrerUserId: 'u1', starredUserId: 'u2', eventId: 'e2', isMutual: true },
+      { id: 's2', starrerUserId: 'u2', starredUserId: 'u1', eventId: 'e2', isMutual: true },
+      { id: 's3', starrerUserId: 'u1', starredUserId: 'u3', eventId: 'e3', isMutual: true },
+      { id: 's4', starrerUserId: 'u3', starredUserId: 'u1', eventId: 'e3', isMutual: true },
+      { id: 's5', starrerUserId: 'u1', starredUserId: 'u6', eventId: 'e3', isMutual: true },
+      { id: 's6', starrerUserId: 'u6', starredUserId: 'u1', eventId: 'e3', isMutual: true },
+      { id: 's7', starrerUserId: 'u1', starredUserId: 'u4', eventId: 'e2', isMutual: true },
+      { id: 's8', starrerUserId: 'u4', starredUserId: 'u1', eventId: 'e2', isMutual: true }
+    ];
+    
+    let openDoors = [
+      { id: 'od1', userId: 'u2', isActive: true, endTime: new Date(Date.now() + 48 * 60 * 60 * 1000) },
+      { id: 'od2', userId: 'u6', isActive: true, endTime: new Date(Date.now() + 24 * 60 * 60 * 1000) }
+    ];
+    
+    let userOpenDoor = null;
+    
+    const missions = [
+      { id: 'm1', userId: 'u2', type: 'ask', prompt: "It's been a while! Ask how their semester is going.", tone: 'friendly', lastInteraction: '5 days ago' },
+      { id: 'm2', userId: 'u3', type: 'invite', prompt: "Invite them to a casual study session or coffee.", tone: 'casual', lastInteraction: '2 days ago' },
+      { id: 'm3', userId: 'u6', type: 'share', prompt: "Share a resource related to something you discussed.", tone: 'supportive', lastInteraction: '1 week ago' }
+    ];
+    
+    let selectedStars = new Set();
+    
+    // Helper Functions
+    function getInitials(user) {
+      return user.firstName[0] + user.lastName[0];
+    }
+    
+    function getMutualConnections() {
+      const mutualUserIds = new Set();
+      stars.forEach(star => {
+        if (star.isMutual && star.starrerUserId === currentUser.id) {
+          mutualUserIds.add(star.starredUserId);
+        }
+      });
+      return Array.from(mutualUserIds).map(id => users.find(u => u.id === id));
+    }
+    
+    function getEventContext(eventId) {
+      return events.find(e => e.id === eventId);
+    }
+    
+    // Tab Switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+      
+      // Refresh content
+      if (tabName === 'dashboard') renderDashboard();
+      if (tabName === 'star') renderStarSelection();
+      if (tabName === 'opendoor') renderOpenDoor();
+      if (tabName === 'mutuals') renderMutuals();
+      if (tabName === 'navigator') renderNavigator();
+    }
+    
+    // Dashboard Rendering
+    function renderDashboard() {
+      const mutuals = getMutualConnections();
+      const openDoorMutuals = mutuals.filter(u => openDoors.some(od => od.userId === u.id && od.isActive));
+      
+      document.getElementById('mutualCount').textContent = mutuals.length;
+      document.getElementById('openDoorCount').textContent = openDoorMutuals.length;
+      document.getElementById('missionCount').textContent = missions.length;
+      
+      // Render OpenDoors
+      const openDoorsHTML = openDoorMutuals.map(user => {
+        const event = getEventContext(stars.find(s => s.starredUserId === user.id)?.eventId);
+        return `
+          <div class="card highlighted">
+            <div class="card-header">
+              <div class="avatar">${getInitials(user)}</div>
+              <div class="card-info">
+                <h3>${user.firstName} ${user.lastName}</h3>
+                <p>${user.affiliation}</p>
+              </div>
+            </div>
+            <p style="font-size: 13px; color: #059669; font-weight: 600;">🚪 Door is open</p>
+            <p style="font-size: 12px; color: #6b7280; margin-top: 4px;">Met at ${event?.name || 'an event'}</p>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('dashboardOpenDoors').innerHTML = openDoorsHTML || 
+        '<div class="empty-state"><p>No mutuals have their doors open right now</p></div>';
+      
+      // Render Missions
+      const missionsHTML = missions.slice(0, 3).map(mission => {
+        const user = users.find(u => u.id === mission.userId);
+        return `
+          <div class="mission-card">
+            <h4>Mission: ${mission.type.toUpperCase()}</h4>
+            <p><strong>${user.firstName}:</strong> ${mission.prompt}</p>
+            <button class="btn success" onclick="completeMission('${mission.id}')">Complete Mission</button>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('dashboardMissions').innerHTML = missionsHTML;
+    }
+    
+    // Star Selection Rendering
+    function renderStarSelection() {
+      const event = events[0]; // GameDev Mixer
+      const attendees = event.attendeeIds.map(id => users.find(u => u.id === id)).filter(u => u.id !== currentUser.id);
+      
+      const attendeesHTML = attendees.map(user => `
+        <div class="attendee-card ${selectedStars.has(user.id) ? 'starred' : ''}" onclick="toggleStar('${user.id}')">
+          <div class="avatar">${getInitials(user)}</div>
+          <h4>${user.firstName}</h4>
+          <p>${user.affiliation}</p>
+          ${selectedStars.has(user.id) ? '<p style="color: #fbbf24; font-weight: 600; margin-top: 4px;">⭐ Starred</p>' : ''}
+        </div>
+      `).join('');
+      
+      document.getElementById('attendeeGrid').innerHTML = attendeesHTML;
+    }
+    
+    function toggleStar(userId) {
+      if (selectedStars.has(userId)) {
+        selectedStars.delete(userId);
+      } else {
+        selectedStars.add(userId);
+      }
+      renderStarSelection();
+    }
+    
+    function saveStars() {
+      if (selectedStars.size === 0) {
+        alert('Please select at least one person to star!');
+        return;
+      }
+      
+      alert(`✅ Saved ${selectedStars.size} star(s) privately!\n\nYou'll be notified if they star you back.`);
+      selectedStars.clear();
+      renderStarSelection();
+    }
+    
+    function skipStars() {
+      alert('No problem! You can always star people later from their profiles.');
+      selectedStars.clear();
+      renderStarSelection();
+    }
+    
+    // OpenDoor Rendering
+    function renderOpenDoor() {
+      const toggle = document.getElementById('openDoorToggle');
+      const status = document.getElementById('openDoorStatus');
+      
+      if (userOpenDoor) {
+        toggle.checked = true;
+        const hoursLeft = Math.round((userOpenDoor.endTime - Date.now()) / (1000 * 60 * 60));
+        status.textContent = `Your door is open for ${hoursLeft} more hours`;
+        status.style.color = '#10b981';
+        
+        // Show notification
+        document.getElementById('openDoorNotifications').innerHTML = `
+          <div class="notification">
+            <div class="notification-icon">✓</div>
+            <div>
+              <strong>Your door is open!</strong>
+              <p style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                ${getMutualConnections().length} mutual connections have been notified
+              </p>
+            </div>
+          </div>
+        `;
+      } else {
+        toggle.checked = false;
+        status.textContent = 'Your door is currently closed';
+        status.style.color = '#6b7280';
+        document.getElementById('openDoorNotifications').innerHTML = '';
+      }
+      
+      // Render mutuals with open doors
+      const mutuals = getMutualConnections();
+      const openDoorMutuals = mutuals.filter(u => openDoors.some(od => od.userId === u.id && od.isActive));
+      
+      const mutualsHTML = openDoorMutuals.map(user => {
+        const event = getEventContext(stars.find(s => s.starredUserId === user.id)?.eventId);
+        const openDoor = openDoors.find(od => od.userId === user.id);
+        const hoursLeft = Math.round((openDoor.endTime - Date.now()) / (1000 * 60 * 60));
+        
+        return `
+          <div class="card highlighted">
+            <div class="card-header">
+              <div class="avatar">${getInitials(user)}</div>
+              <div class="card-info">
+                <h3>${user.firstName} ${user.lastName}</h3>
+                <p>${user.affiliation}</p>
+              </div>
+            </div>
+            <span class="badge green">🚪 Door Open (${hoursLeft}h left)</span>
+            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">Met at ${event?.name || 'an event'}</p>
+            <button class="btn" style="margin-top: 12px; width: 100%;" onclick="reachOut('${user.id}')">Reach Out</button>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('openDoorMutuals').innerHTML = mutualsHTML || 
+        '<div class="empty-state"><h3>No open doors right now</h3><p>Check back later or open your own door!</p></div>';
+    }
+    
+    function toggleOpenDoor() {
+      const toggle = document.getElementById('openDoorToggle');
+      
+      if (toggle.checked) {
+        userOpenDoor = {
+          id: 'od_user',
+          userId: currentUser.id,
+          isActive: true,
+          endTime: new Date(Date.now() + 72 * 60 * 60 * 1000)
+        };
+        alert('🚪 Your door is now open!\n\nYour mutual connections will be gently notified based on their preferences.');
+      } else {
+        userOpenDoor = null;
+        alert('Your door has been closed.');
+      }
+      
+      renderOpenDoor();
+      renderDashboard();
+    }
+    
+    function reachOut(userId) {
+      const user = users.find(u => u.id === userId);
+      alert(`💬 Opening conversation with ${user.firstName}...\n\nConversation starters:\n• "Hey! Saw your door was open. Want to grab coffee?"\n• "How's your semester going?"\n• "Been meaning to catch up!"`);
+    }
+    
+    // Mutuals Rendering
+    function renderMutuals() {
+      const mutuals = getMutualConnections();
+      
+      const mutualsHTML = mutuals.map(user => {
+        const star = stars.find(s => s.starrerUserId === currentUser.id && s.starredUserId === user.id);
+        const event = getEventContext(star?.eventId);
+        const hasOpenDoor = openDoors.some(od => od.userId === user.id && od.isActive);
+        
+        return `
+          <div class="card ${hasOpenDoor ? 'highlighted' : ''}">
+            <div class="card-header">
+              <div class="avatar">${getInitials(user)}</div>
+              <div class="card-info">
+                <h3>${user.firstName} ${user.lastName}</h3>
+                <p>${user.affiliation}</p>
+              </div>
+            </div>
+            ${hasOpenDoor ? '<span class="badge green">🚪 Door Open</span>' : ''}
+            <span class="badge blue">Met at ${event?.name || 'an event'}</span>
+            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+              Interests: ${user.interests.join(', ')}
+            </p>
+            <button class="btn" style="margin-top: 12px; width: 100%;" onclick="viewProfile('${user.id}')">View Profile</button>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('mutualsList').innerHTML = mutualsHTML;
+    }
+    
+    function viewProfile(userId) {
+      const user = users.find(u => u.id === userId);
+      alert(`👤 ${user.firstName} ${user.lastName}\n\n${user.affiliation}\nInterests: ${user.interests.join(', ')}\n\n[Full profile view would open here]`);
+    }
+    
+    // Navigator Rendering
+    function renderNavigator() {
+      const navigatorHTML = missions.map(mission => {
+        const user = users.find(u => u.id === mission.userId);
+        const event = getEventContext(stars.find(s => s.starredUserId === user.id)?.eventId);
+        
+        return `
+          <div class="card">
+            <div class="card-header">
+              <div class="avatar">${getInitials(user)}</div>
+              <div class="card-info">
+                <h3>${user.firstName} ${user.lastName}</h3>
+                <p>Last chatted: ${mission.lastInteraction}</p>
+              </div>
+            </div>
+            
+            <div class="mission-card" style="margin-top: 12px;">
+              <h4>Mission: ${mission.type.toUpperCase()}</h4>
+              <p>${mission.prompt}</p>
+              <button class="btn success" onclick="completeMission('${mission.id}')">Complete Mission</button>
+            </div>
+            
+            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+              Met at ${event?.name || 'an event'}
+            </p>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('navigatorList').innerHTML = navigatorHTML;
+    }
+    
+    function completeMission(missionId) {
+      const mission = missions.find(m => m.id === missionId);
+      const user = users.find(u => u.id === mission.userId);
+      
+      alert(`🎉 Mission completed!\n\nGreat job staying connected with ${user.firstName}. Your relationship is growing stronger!`);
+      
+      // Remove mission (in real app, would mark as completed)
+      const index = missions.findIndex(m => m.id === missionId);
+      if (index > -1) missions.splice(index, 1);
+      
+      renderNavigator();
+      renderDashboard();
+    }
+    
+    // Initialize
+    renderDashboard();
+  </script>
+</body>
+</html>
